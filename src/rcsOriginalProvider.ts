@@ -28,9 +28,13 @@ export class RcsContentProvider implements TextDocumentContentProvider {
     }
 
     public async provideTextDocumentContent(uri: Uri) {
+        try {
         let text = await execute('co -p -q ' + uri.fsPath);
         console.log(text);
         return text;
+        } catch(e) {
+            return '';
+        }
     }
 
     dispose() {

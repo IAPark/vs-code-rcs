@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { RcsContentProvider } from './rcsOriginalProvider'
 import { RcsScmProvider } from './rcsScmProvider'
+import { RcsWatcher } from './model'
+
 function createResourceUri(relativePath: string): vscode.Uri {
   const absolutePath = path.join(vscode.workspace.rootPath, relativePath);
   return vscode.Uri.file(absolutePath);
@@ -23,6 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(scm);
     context.subscriptions.push(rcsDocProvider);
+    let watcher = new RcsWatcher()
+    watcher.inform( (uri, state) => {
+      console.log(uri);
+    })
+    context.subscriptions.push(watcher)
 }
 
 // this method is called when your extension is deactivated
