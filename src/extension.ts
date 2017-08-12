@@ -3,7 +3,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-
+import { RcsContentProvider } from './rcsOriginalProvider'
+import { RcsScmProvider } from './rcsScmProvider'
 function createResourceUri(relativePath: string): vscode.Uri {
   const absolutePath = path.join(vscode.workspace.rootPath, relativePath);
   return vscode.Uri.file(absolutePath);
@@ -17,28 +18,11 @@ export function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "rcs" is now active!');
-    let disposables: vscode.Disposable[] = []; 
-    let scm = (vscode.scm.createSourceControl('vcs', 'VCS'));
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-        // The code you place here will be executed every time your command is executed
-            const index = scm.createResourceGroup('index', "Index");
-    index.resourceStates = [
-    { resourceUri: createResourceUri('README.md') },
-    ];
+    let scm = new RcsScmProvider();
+    let rcsDocProvider = new RcsContentProvider();
 
-    const workingTree = scm.createResourceGroup('workingTree', "Changes");
-    workingTree.resourceStates = [
-    { resourceUri: vscode.Uri.parse('adfs') }
-    ];
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
-    });
-
-    context.subscriptions.push(disposable);
     context.subscriptions.push(scm);
+    context.subscriptions.push(rcsDocProvider);
 }
 
 // this method is called when your extension is deactivated
