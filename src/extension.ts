@@ -25,11 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(scm);
     context.subscriptions.push(rcsDocProvider);
-    let watcher = new RcsWatcher()
-    watcher.inform( (uri, state) => {
-      console.log(uri);
-    })
-    context.subscriptions.push(watcher)
 }
 
 // this method is called when your extension is deactivated

@@ -36,6 +36,7 @@
         "@types/mocha": "^2.2.32"
     },
     "dependencies": {
+        "@types/username": "^1.0.28",
         "username": "^3.0.0"
     }
 }
