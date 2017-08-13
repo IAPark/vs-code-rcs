@@ -3,8 +3,14 @@ import { Uri } from 'vscode'
 import * as path from 'path'
 import { RcsState, getInfo } from './rcs'
 
+export enum RcsEventType {
+    rcsChange,
+    fileChange,
+    initial
+}
+
 interface RcsListener {
-    (uri: Uri, newState: RcsState|undefined): any
+    (uri: Uri, newState: RcsState|undefined, type: RcsEventType): any
 }
 
 export class RcsWatcher implements Disposable {
@@ -12,8 +18,8 @@ export class RcsWatcher implements Disposable {
     private listeners: RcsListener[] = [];
     constructor () {
         this.watcher = workspace.createFileSystemWatcher('**/*');
-        let callback: RcsListener = (uri, newState) => {
-            this.listeners.forEach(l => l(uri, newState));
+        let callback: RcsListener = (uri, newState, type) => {
+            this.listeners.forEach(l => l(uri, newState, type));
         }
 
         this.watcher.onDidCreate(
@@ -21,11 +27,11 @@ export class RcsWatcher implements Disposable {
                 if (uri.path.endsWith(',v')) {
                     getInfo(uri.fsPath).then(
                         (info) => {
-                            callback(Uri.file(info.workingFile), info.state);
+                            callback(Uri.file(info.workingFile), info.state, RcsEventType.rcsChange);
                         }
                     );
                 } else {
-                    callback(uri, undefined);
+                    callback(uri, undefined, RcsEventType.fileChange);
                 }
             }
         );
@@ -35,7 +41,7 @@ export class RcsWatcher implements Disposable {
                 if (uri.path.endsWith(',v')) {
                     getInfo(uri.fsPath).then(
                         (info) => {
-                            callback(Uri.file(info.workingFile), info.state);
+                            callback(Uri.file(info.workingFile), info.state, RcsEventType.rcsChange);
                         }
                     );
                 }
@@ -51,15 +57,23 @@ export class RcsWatcher implements Disposable {
                     URIs.forEach(uri => {
                         getInfo(uri.fsPath)
                             .then((info) => {
-                                callback(Uri.file(info.workingFile), info.state);
+                                callback(Uri.file(info.workingFile), info.state, RcsEventType.initial);
                             })
                             .catch(e => {
-                                callback(uri, undefined);
+                                callback(uri, undefined, RcsEventType.initial);
                             })
                     });
                 }
             )
     };
+    
+    onRcsChange (callback: (uri: Uri)=>any) {
+        this.inform((uri, state, type) => {
+            if (type == RcsEventType.rcsChange) {
+                callback(uri);
+            }
+        }) 
+    }
 
     dispose() {
         this.watcher.dispose();

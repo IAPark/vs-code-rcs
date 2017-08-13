@@ -1,37 +1,31 @@
-import { TextDocumentContentProvider, Uri, Disposable, workspace } from 'vscode';
+import { TextDocumentContentProvider, Uri, Disposable, workspace, EventEmitter, Event } from 'vscode';
 
-import { exec } from 'child_process';
+import { getHead } from './rcs';
+import { RcsWatcher } from './model';
 
-function execute(command: string): Promise<string> {
-
-    return new Promise( (resolve, reject) => {
-        exec(command, (err, stdout, stderr) => {
-            if (err) {
-                reject(err);
-            }
-            if (stderr.length > 0) {
-                reject(stderr);
-            }
-            resolve(stdout);
-        });
-    })
-
-}
 
 
 export class RcsContentProvider implements TextDocumentContentProvider {
     private disposables: Disposable[] = [];
+    private onDidChangeEmitter = new EventEmitter<Uri>();
+    get onDidChange(): Event<Uri> { return this.onDidChangeEmitter.event; }
+
+    private watcher: RcsWatcher = new RcsWatcher();
+
     constructor() {
         this.disposables.push(
-			workspace.registerTextDocumentContentProvider('rcs', this)
-		);
+            workspace.registerTextDocumentContentProvider('rcs', this),
+            this.watcher
+        );
+        this.watcher.onRcsChange( (uri) =>
+            this.onDidChangeEmitter.fire(uri.with({
+            scheme: 'rcs'})));
     }
 
     public async provideTextDocumentContent(uri: Uri) {
         try {
-        let text = await execute('co -p -q ' + uri.fsPath);
-        console.log(text);
-        return text;
+            let text = await getHead(uri.fsPath);
+            return text;
         } catch(e) {
             return '';
         }

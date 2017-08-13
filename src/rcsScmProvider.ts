@@ -69,11 +69,7 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
 
     provideOriginalResource(uri: Uri): Uri | undefined  {
         return uri.with({
-            scheme: 'rcs',
-            path: `${uri.path}`,
-            query: JSON.stringify({
-                path: uri.fsPath,
-            })
+            scheme: 'rcs'
         });
     }
 

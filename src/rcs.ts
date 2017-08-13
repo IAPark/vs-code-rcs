@@ -1,5 +1,5 @@
 import { exec } from 'child_process';
-
+import * as path from 'path'
 function execute(command: string): Promise<string> {
 
     return new Promise( (resolve, reject) => {
@@ -35,6 +35,11 @@ export interface RcsInfo {
 
 export async function getInfo(file: string): Promise<RcsInfo> {
     let log = await rlog(file);
+    let base = path.dirname(path.dirname(log.rcsFile));
+    
+    if (!path.isAbsolute(log.workingFile)) {
+        log.workingFile = path.join(base, log.workingFile);
+    }
     return {
         workingFile: log.workingFile,
         rcsFile: log.rcsFile,
