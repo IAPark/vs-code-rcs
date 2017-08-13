@@ -6,6 +6,7 @@ import * as path from 'path';
 import { RcsContentProvider } from './rcsOriginalProvider'
 import { RcsScmProvider } from './rcsScmProvider'
 import { RcsWatcher } from './model'
+import { Resource } from './resource';
 
 function createResourceUri(relativePath: string): vscode.Uri {
   const absolutePath = path.join(vscode.workspace.rootPath, relativePath);
@@ -25,6 +26,22 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(scm);
     context.subscriptions.push(rcsDocProvider);
+
+    let command = vscode.commands.registerCommand('extension.openResource', (resource: Resource) => {
+        console.log(resource);
+
+        let left = resource.resourceUri;
+        let right = resource.headUri;
+
+        const opts: vscode.TextDocumentShowOptions = {
+          preserveFocus: true,
+          preview: false,
+          viewColumn: vscode.window.activeTextEditor && vscode.window.activeTextEditor.viewColumn || vscode.ViewColumn.One
+        };
+        return vscode.commands.executeCommand<void>('vscode.diff', left, right, 'RCS Diff', opts)
+    })
+    context.subscriptions.push(command);
+
 }
 
 // this method is called when your extension is deactivated

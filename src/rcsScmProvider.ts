@@ -1,6 +1,7 @@
 import { Disposable, scm, SourceControl, QuickDiffProvider, Uri, SourceControlResourceGroup } from 'vscode'
 import { RcsWatcher } from './model';
 import { RcsState } from './rcs';
+import { Resource } from './resource';
 
 const username: () => Promise<string> = require('username')
 
@@ -46,7 +47,7 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
     }
 
     recalcResourceState () {
-        let fileToResourceState = (file: string) => ({resourceUri: Uri.file(file)});
+        let fileToResourceState = (file: string) => new Resource(file);
 
         username().then((user) => {
             let lockedFiles = [];
