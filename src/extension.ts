@@ -7,7 +7,7 @@ import { RcsContentProvider } from './rcsOriginalProvider'
 import { RcsScmProvider } from './rcsScmProvider'
 import { RcsWatcher } from './model'
 import { Resource } from './resource';
-import { checkin,  } from './rcs';
+import { checkin, lock  } from './rcs';
 
 function createResourceUri(relativePath: string): vscode.Uri {
   const absolutePath = path.join(vscode.workspace.rootPath, relativePath);
@@ -42,11 +42,11 @@ export function activate(context: vscode.ExtensionContext) {
         return vscode.commands.executeCommand<void>('vscode.diff', left, right, 'RCS Diff', opts)
     })
 
-    let lock = vscode.commands.registerCommand('rcs.lock', (uri: vscode.Uri) => {
-
+    let lockCommand = vscode.commands.registerCommand('rcs.lock', (uri: vscode.Uri) => {
+      lock(uri.fsPath);
     });
 
-    context.subscriptions.push(lock);
+    context.subscriptions.push(lockCommand);
 
 }
 

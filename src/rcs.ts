@@ -10,6 +10,15 @@ export async function checkin(path: string, message) {
     return;
 }
 
+export async function lock(path: string) {
+    let result = await execute("co -l "+path);
+    let lines = result.split('\n');
+    if (lines[2] != 'done') {
+        throw result;
+    }
+    return;
+}
+
 export function getHead(path: string) {
     return execute('co -p -q ' + path);
 }
