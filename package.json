@@ -17,10 +17,31 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.sayHello",
-                "title": "Hello World"
+                "command": "rcs.openResouce",
+                "title": "Open a resource"
+            },
+            {
+                "command": "rcs.lock",
+                "title": "Lock"
+            },
+            {
+                "command": "rcs.checkin",
+                "title": "Checkin"
             }
-        ]
+        ],
+        "menus": {
+            "explorer/context": [{
+                "command": "rcs.lock",
+                "group": "navigation"
+            }],
+
+            "scm/resourceState/context": [
+                {
+                    "command": "rcs.checkin",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "tsc -p ./",

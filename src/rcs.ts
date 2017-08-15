@@ -1,19 +1,13 @@
 import { exec } from 'child_process';
 import * as path from 'path'
-function execute(command: string): Promise<string> {
 
-    return new Promise( (resolve, reject) => {
-        exec(command, (err, stdout, stderr) => {
-            if (err) {
-                reject(err);
-            }
-            if (stderr.length > 0) {
-                reject(stderr);
-            }
-            resolve(stdout);
-        });
-    })
-
+export async function checkin(path: string, message) {
+    let result = await execute("ci -u -m'"+message+"' "+path);
+    let lines = result.split('\n');
+    if (lines[2] != 'done') {
+        throw result;
+    }
+    return;
 }
 
 export function getHead(path: string) {
@@ -79,4 +73,20 @@ async function rlog(file: string): Promise<rLog> {
     }
 
     return {rcsFile, workingFile, head, locker};
+}
+
+function execute(command: string): Promise<string> {
+
+    return new Promise( (resolve, reject) => {
+        exec(command, (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            }
+            if (stderr.length > 0) {
+                reject(stderr);
+            }
+            resolve(stdout);
+        });
+    })
+
 }

@@ -12,7 +12,7 @@ export class Resource implements SourceControlResourceState {
 
     get command() {
         return {
-			command: 'extension.openResource',
+			command: 'rcs.openResource',
 			title: "Open",
 			arguments: [this]
 		};
