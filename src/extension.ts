@@ -29,22 +29,25 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(rcsDocProvider);
 
     let command = vscode.commands.registerCommand('rcs.openResource', (resource: Resource) => {
-        console.log(resource);
-
         let left = resource.resourceUri;
         let right = resource.headUri;
 
         const opts: vscode.TextDocumentShowOptions = {
           preserveFocus: true,
-          preview: false,
+          preview: true,
           viewColumn: vscode.window.activeTextEditor && vscode.window.activeTextEditor.viewColumn || vscode.ViewColumn.One
         };
-        return vscode.commands.executeCommand<void>('vscode.diff', left, right, 'RCS Diff', opts)
+        return vscode.commands.executeCommand<void>('vscode.diff', right, left, 'RCS Diff: '+left.path, opts)
     })
 
     let lockCommand = vscode.commands.registerCommand('rcs.lock', (uri: vscode.Uri) => {
       lock(uri.fsPath);
     });
+
+    let checkinCommand = vscode.commands.registerCommand('rcs.checkin', (...resourceStates: vscode.SourceControlResourceState[]) => {
+      console.log(resourceStates.map(s=>s.resourceUri));
+    });
+    vscode.scm.inputBox.value
 
     context.subscriptions.push(lockCommand);
 

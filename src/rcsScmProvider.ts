@@ -1,5 +1,5 @@
 import { Disposable, scm, SourceControl, QuickDiffProvider, Uri, SourceControlResourceGroup } from 'vscode'
-import { RcsWatcher } from './model';
+import { RcsWatcher, RcsEventType } from './model';
 import { RcsState } from './rcs';
 import { Resource } from './resource';
 
@@ -14,6 +14,7 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
     private locked: SourceControlResourceGroup;
     private lockedOthers: SourceControlResourceGroup;
     private unchanged: SourceControlResourceGroup;
+    private untracked: SourceControlResourceGroup;
 
     private states: {
         [file: string]: RcsState
@@ -24,26 +25,37 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
         this.disposables.push(this._scm);
         
         this.locked = this._scm.createResourceGroup('loc', 'Locked');
-        this.locked.resourceStates = [];
         this.lockedOthers = this._scm.createResourceGroup('locOther', 'Locked by Others');
-        this.lockedOthers.resourceStates = [];
+        this.untracked = this._scm.createResourceGroup('untrac', 'Untracked');
+        
+        this.untracked.hideWhenEmpty = true;
+        this.lockedOthers.hideWhenEmpty = true;
+
 
         this.disposables.push(
             this.locked,
-            this.lockedOthers
+            this.lockedOthers,
+            this.untracked
         )
         let watcher = new RcsWatcher();
         this.disposables.push(watcher);
 
 
         watcher.inform( 
-            (uri, state) => {
-                this.states[uri.fsPath] = state;
-                console.log(uri);
+            (uri, state, type) => {
+                if (type === RcsEventType.fileRemove) {
+                    delete this.states[uri.fsPath];
+                } else {
+                    this.states[uri.fsPath] = state;
+                }
                 this.recalcResourceState();
             }
         );
         this._scm.quickDiffProvider = this;
+    }
+
+    get acceptInputCommand() {
+        return 'rcs.checkin';
     }
 
     recalcResourceState () {
@@ -52,6 +64,7 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
         username().then((user) => {
             let lockedFiles = [];
             let lockedOthersFiles = [];
+            let untrackedFiles = [];
             for (let file in this.states) {
                 let state = this.states[file];
                 if (state && state.locked) {
@@ -60,11 +73,15 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
                     } else {
                         lockedOthersFiles.push(file);
                     }
+                } else if (!state) {
+                    untrackedFiles.push(file);
                 }
             }
             this._scm.count = lockedFiles.length;
             this.locked.resourceStates = lockedFiles.map(fileToResourceState);
             this.lockedOthers.resourceStates = lockedOthersFiles.map(fileToResourceState);
+            this.untracked.resourceStates = untrackedFiles.map(fileToResourceState);
+
         });
     }
 

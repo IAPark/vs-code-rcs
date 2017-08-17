@@ -22,11 +22,14 @@
             },
             {
                 "command": "rcs.lock",
-                "title": "Lock"
+                "title": "Lock",
+                "when": "scmProvider == rcs"
+
             },
             {
                 "command": "rcs.checkin",
-                "title": "Checkin"
+                "title": "Checkin",
+                "when": "scmProvider == rcs && scmResourceGroup == loc"
             }
         ],
         "menus": {
@@ -35,10 +38,10 @@
                 "group": "navigation"
             }],
 
-            "scm/resourceState/context": [
+            "scm/resourceGroup/context": [
                 {
                     "command": "rcs.checkin",
-                    "group": "navigation"
+                    "group": "inline"
                 }
             ]
         }

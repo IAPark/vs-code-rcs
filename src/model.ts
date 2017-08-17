@@ -6,6 +6,7 @@ import { RcsState, getInfo } from './rcs'
 export enum RcsEventType {
     rcsChange,
     fileChange,
+    fileRemove,
     initial
 }
 
@@ -32,6 +33,21 @@ export class RcsWatcher implements Disposable {
                     );
                 } else {
                     callback(uri, undefined, RcsEventType.fileChange);
+                }
+            }
+        );
+
+        this.watcher.onDidDelete(
+            (uri) => {
+                if (uri.path.endsWith(',v')) {
+                    if (path.dirname(uri.path) == 'RCS') {
+                        let rcsFile = path.basename(uri.path);
+                        let file = rcsFile.substr(0, rcsFile.length-2);
+                        let filePath  = path.join(uri.fsPath, '../'+file);
+                        callback(Uri.file(filePath), undefined, RcsEventType.rcsChange);
+                    }
+                } else {
+                    callback(uri, undefined, RcsEventType.fileRemove);
                 }
             }
         );

@@ -50,6 +50,34 @@ export async function getInfo(file: string): Promise<RcsInfo> {
     }
 }
 
+const keywords: string[] = ['Author', 'Date', 'Header', 'Id', 'Locker',
+                            'Locker', 'Log', 'Name', 'RCSfile', 'Revision',
+                            'Source', 'State']
+export function getKeywords(text: string) {
+    let potential = text.split('$');
+    let matches = {};
+    potential.forEach(s => {
+        let token = keywords.find(keyword => s.startsWith(keyword));
+        if (token != undefined) {
+            matches[token] = s.slice(token.length);
+        }
+    });
+    return matches;
+}
+
+export function setKeywords(text: string, replacement: {[keyword: string]: string}) {
+    let potential = text.split('$');
+    let result = potential.map(s => {
+        let token = Object.keys(replacement).find(keyword => s.startsWith(keyword));
+        if (token != undefined) {
+            return token + replacement[token];
+        } else {
+            return s;
+        }
+    });
+    return result.join('$');
+}
+
 interface rLog {
     rcsFile: string,
     workingFile: string,
