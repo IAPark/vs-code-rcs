@@ -44,12 +44,13 @@ export function activate(context: vscode.ExtensionContext) {
       lock(uri.fsPath);
     });
 
+    let refreshCommand = vscode.commands.registerCommand('rcs.refresh', () => scm.refresh());
+
     let checkinCommand = vscode.commands.registerCommand('rcs.checkin', (...resourceStates: vscode.SourceControlResourceState[]) => {
       console.log(resourceStates.map(s=>s.resourceUri));
     });
-    vscode.scm.inputBox.value
 
-    context.subscriptions.push(lockCommand);
+    context.subscriptions.push(lockCommand, checkinCommand, refreshCommand);
 
 }
 

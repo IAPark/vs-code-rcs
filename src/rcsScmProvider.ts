@@ -10,6 +10,7 @@ const username: () => Promise<string> = require('username')
 export class RcsScmProvider implements QuickDiffProvider, Disposable {
     private disposables: Disposable[] = [];
     private _scm: SourceControl;
+    private watcher: RcsWatcher;
 
     private locked: SourceControlResourceGroup;
     private lockedOthers: SourceControlResourceGroup;
@@ -37,25 +38,29 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
             this.lockedOthers,
             this.untracked
         )
-        let watcher = new RcsWatcher();
-        this.disposables.push(watcher);
-
-
-        watcher.inform( 
-            (uri, state, type) => {
-                if (type === RcsEventType.fileRemove) {
-                    delete this.states[uri.fsPath];
-                } else {
-                    this.states[uri.fsPath] = state;
-                }
-                this.recalcResourceState();
-            }
-        );
+        this.watcher = new RcsWatcher();
+        this.disposables.push(this.watcher);
+        this.callback = this.callback.bind(this);
+        this.watcher.inform(this.callback);
         this._scm.quickDiffProvider = this;
     }
 
     get acceptInputCommand() {
         return 'rcs.checkin';
+    }
+
+    callback(uri, state, type) {
+        if (type === RcsEventType.fileRemove) {
+            delete this.states[uri.fsPath];
+        } else {
+            this.states[uri.fsPath] = state;
+        }
+        this.recalcResourceState();
+    }
+
+    refresh() {
+        this.states = {};
+        this.watcher.getCurrentState(this.callback)
     }
 
     recalcResourceState () {

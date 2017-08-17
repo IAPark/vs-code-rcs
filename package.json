@@ -30,12 +30,23 @@
                 "command": "rcs.checkin",
                 "title": "Checkin",
                 "when": "scmProvider == rcs && scmResourceGroup == loc"
+            },
+            {
+                "command": "rcs.refresh",
+                "title": "Refresh",
+                "when": "scmProvider == rcs"
             }
         ],
         "menus": {
+            "scm/title": [{
+                "command": "rcs.refresh",
+                "group": "inline",
+                "when": "scmProvider == rcs"
+            }],
             "explorer/context": [{
                 "command": "rcs.lock",
-                "group": "navigation"
+                "group": "navigation",
+                "when": "scmProvider == rcs"
             }],
 
             "scm/resourceGroup/context": [

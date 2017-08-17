@@ -67,6 +67,10 @@ export class RcsWatcher implements Disposable {
 
     inform(callback: RcsListener) {
         this.listeners.push(callback);
+        this.getCurrentState(callback);
+    };
+
+    getCurrentState(callback: RcsListener) {
         workspace.findFiles('**/*', '**/RCS/*')
             .then(
                 (URIs) => {
@@ -80,8 +84,10 @@ export class RcsWatcher implements Disposable {
                             })
                     });
                 }
-            )
-    };
+            );
+    }
+    
+    
     
     onRcsChange (callback: (uri: Uri)=>any) {
         this.inform((uri, state, type) => {
