@@ -12,28 +12,36 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
     private _scm: SourceControl;
     private watcher: RcsWatcher;
 
+    private staged: SourceControlResourceGroup;
     private locked: SourceControlResourceGroup;
     private lockedOthers: SourceControlResourceGroup;
     private unchanged: SourceControlResourceGroup;
     private untracked: SourceControlResourceGroup;
 
+    public stagedFiles: string[] = [];
     private states: {
         [file: string]: RcsState
     } = {};
 
     constructor() {
         this._scm = scm.createSourceControl('rcs', 'RCS');
+        this._scm.acceptInputCommand = this.acceptInputCommand;
         this.disposables.push(this._scm);
         
+        this.staged = this._scm.createResourceGroup('staged', 'Staged');
+
         this.locked = this._scm.createResourceGroup('loc', 'Locked');
         this.lockedOthers = this._scm.createResourceGroup('locOther', 'Locked by Others');
         this.untracked = this._scm.createResourceGroup('untrac', 'Untracked');
         
+        this.staged.hideWhenEmpty = true;
+
         this.untracked.hideWhenEmpty = true;
         this.lockedOthers.hideWhenEmpty = true;
 
 
         this.disposables.push(
+            this.staged,
             this.locked,
             this.lockedOthers,
             this.untracked
@@ -46,7 +54,7 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
     }
 
     get acceptInputCommand() {
-        return 'rcs.checkin';
+        return { command: 'rcs.checkin', title: 'Checkin' };
     }
 
     callback(uri, state, type) {
@@ -62,7 +70,7 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
         this.states = {};
         this.watcher.getCurrentState(this.callback)
     }
-
+    
     recalcResourceState () {
         let fileToResourceState = (file: string) => new Resource(file);
 
@@ -83,7 +91,9 @@ export class RcsScmProvider implements QuickDiffProvider, Disposable {
                 }
             }
             this._scm.count = lockedFiles.length;
-            this.locked.resourceStates = lockedFiles.map(fileToResourceState);
+            this.staged.resourceStates = this.stagedFiles.map(fileToResourceState);
+            this.locked.resourceStates = lockedFiles.filter(file => this.stagedFiles.indexOf(file) === -1)
+                                                        .map(fileToResourceState);
             this.lockedOthers.resourceStates = lockedOthersFiles.map(fileToResourceState);
             this.untracked.resourceStates = untrackedFiles.map(fileToResourceState);
 

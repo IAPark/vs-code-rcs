@@ -46,8 +46,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     let refreshCommand = vscode.commands.registerCommand('rcs.refresh', () => scm.refresh());
 
-    let checkinCommand = vscode.commands.registerCommand('rcs.checkin', (...resourceStates: vscode.SourceControlResourceState[]) => {
-      console.log(resourceStates.map(s=>s.resourceUri));
+    let checkinCommand = vscode.commands.registerCommand('rcs.checkin', (...resourceStates: Resource[]) => {
+      scm.stagedFiles.forEach(file => {
+        checkin(file, vscode.scm.inputBox.value);
+      });
+      vscode.scm.inputBox.value = '';
+      scm.stagedFiles = [];
+    });
+
+    let stageCommand = vscode.commands.registerCommand('rcs.stage', (...resourceStates: vscode.SourceControlResourceState[]) => {
+      console.log(resourceStates[0].resourceUri.fsPath);
+      scm.stagedFiles.push(...resourceStates.map(r=>r.resourceUri.fsPath));
+      scm.recalcResourceState();
     });
 
     context.subscriptions.push(lockCommand, checkinCommand, refreshCommand);

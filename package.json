@@ -35,6 +35,11 @@
                 "command": "rcs.refresh",
                 "title": "Refresh",
                 "when": "scmProvider == rcs"
+            },
+            {
+                "command": "rcs.stage",
+                "title": "Stage",
+                "when": "scmProvider == rcs"
             }
         ],
         "menus": {
@@ -51,8 +56,18 @@
 
             "scm/resourceGroup/context": [
                 {
-                    "command": "rcs.checkin",
-                    "group": "inline"
+                    "command": "rcs.stage",
+                    "group": "inline",
+                    "when": "scmProvider == rcs && scmResourceGroup == loc"
+
+                }
+            ], 
+
+            "scm/resourceState/context": [
+                {
+                    "command": "rcs.stage",
+                    "group": "inline",
+                    "when": "scmProvider == rcs && scmResourceGroup == loc"
                 }
             ]
         }
