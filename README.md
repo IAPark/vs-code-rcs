@@ -1,6 +1,8 @@
 # RCS
 
-An extension to add basic SCM support for RCS. Experimental and RCS in particular is not recomended
+An extension to add basic SCM support for RCS. Experimental and RCS in particular is not recommended
+
+It may also use larger than expected CPU when it first scans a directory. For this reason combined with not getting activation events to work right it's better to keep this disabled by default and only enable it for projects that use RCS
 
 ## Features
 
