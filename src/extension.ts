@@ -8,6 +8,7 @@ import { RcsScmProvider } from './rcsScmProvider'
 import { RcsWatcher } from './model'
 import { Resource } from './resource';
 import { checkin, lock  } from './rcs';
+import { SaveHandler } from "./saveHandler";
 
 function createResourceUri(relativePath: string): vscode.Uri {
   const absolutePath = path.join(vscode.workspace.rootPath, relativePath);
@@ -60,7 +61,9 @@ export function activate(context: vscode.ExtensionContext) {
       scm.recalcResourceState();
     });
 
-    context.subscriptions.push(lockCommand, checkinCommand, refreshCommand);
+    let saveHandler = new SaveHandler();
+
+    context.subscriptions.push(lockCommand, checkinCommand, refreshCommand, saveHandler);
 
 }
 
