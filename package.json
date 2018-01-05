@@ -7,9 +7,11 @@
     "engines": {
         "vscode": "^1.14.0"
     },
+    
     "categories": [
-        "Other"
+        "SCM Providers"
     ],
+    "preview": true,
     "activationEvents": [
         "*"
     ],
