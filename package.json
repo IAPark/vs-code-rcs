@@ -4,6 +4,7 @@
     "description": "SCM provider for RCS",
     "version": "0.0.2",
     "publisher": "iapark",
+    "repository": { "type" : "git", "url" : "https://github.com/IAPark/vs-code-rcs.git"},
     "engines": {
         "vscode": "^1.14.0"
     },
