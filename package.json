@@ -2,7 +2,7 @@
     "name": "rcs",
     "displayName": "RCS Integration",
     "description": "SCM provider for RCS",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "iapark",
     "repository": {
         "type": "git",
