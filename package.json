@@ -87,8 +87,8 @@
         "compile": "tsc -watch -p ./"
     },
     "devDependencies": {
-        "typescript": "^2.0.3",
-        "@types/vscode": "^1.50.0",
+        "typescript": "^4.0.3",
+        "@types/vscode": "^1.14.0",
         "@types/node": "^6.0.40"
     },
     "dependencies": {
