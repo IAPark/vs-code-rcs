@@ -14,6 +14,7 @@
     "categories": [
         "SCM Providers"
     ],
+    "extensionKind": ["workspace"],
     "preview": true,
     "activationEvents": [
         "*"
