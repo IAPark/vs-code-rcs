@@ -1,8 +1,8 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import * as path from 'path'
 
 export async function checkin(path: string, message) {
-    let result = await execute("ci -u -m'"+message+"' "+path);
+    let result = await execute("ci", "-u", `-m'${message}'`, path);
     let lines = result.split('\n');
     if (lines[2] != 'done') {
         throw result;
@@ -11,7 +11,7 @@ export async function checkin(path: string, message) {
 }
 
 export async function lock(path: string) {
-    let result = await execute("co -l "+path);
+    let result = await execute("co", "-l", path);
     let lines = result.split('\n');
     if (lines[2] != 'done') {
         throw result;
@@ -20,7 +20,7 @@ export async function lock(path: string) {
 }
 
 export function getHead(path: string) {
-    return execute('co -p -q ' + path);
+    return execute('co', '-p', '-q', path);
 }
 
 export interface RcsState {
@@ -38,9 +38,12 @@ export interface RcsInfo {
 
 export async function getInfo(file: string): Promise<RcsInfo> {
     let log = await rlog(file);
-    let base = path.dirname(path.dirname(log.rcsFile));
-    
     if (!path.isAbsolute(log.workingFile)) {
+        let base = path.dirname(log.rcsFile)
+        if (path.basename(base) == 'RCS') { // this appears to be a special case
+            base = path.dirname(base);
+        }
+
         log.workingFile = path.join(base, log.workingFile);
     }
     return {
@@ -94,7 +97,7 @@ function logToState (log: rLog): RcsState{
 }
 
 async function rlog(file: string): Promise<rLog> {
-    let rlogOutput = await execute('rlog '+file);
+    let rlogOutput = await execute('rlog', file);
     let lines = rlogOutput.split('\n');
     if (lines.length <= 1) {
         throw "can't get info";
@@ -112,10 +115,10 @@ async function rlog(file: string): Promise<rLog> {
     return {rcsFile, workingFile, head, locker};
 }
 
-function execute(command: string): Promise<string> {
+function execute(command: string, ...args: string[]): Promise<string> {
 
     return new Promise( (resolve, reject) => {
-        exec(command, (err, stdout, stderr) => {
+        execFile(command, args, (err, stdout, stderr) => {
             if (err) {
                 reject(err);
             }
